@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Document</title>
+</head>
+<body>
+
+    <table class="my-table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>User</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+           
+            <% employees.forEach(function(employee) { %>
+                <tr>
+                  <td><%= employee.id %></td>
+                  <td><%= employee.user %></td>
+                  <td><%= employee.email %></td> 
+                  <td>
+                     <button class="db" onclick="deleteEmployee('<%= employee._id %>')">Delete</button>
+                     <button class="ub" onclick="updateEmployee('<%=employee._id %>')">Update</button>
+                  </td>
+                </tr>
+              <% }); %>
+              <button class="adduser" onclick="addUser(<%=JSON.stringify(employees) %>);">AddUser</button>      
+        </tbody>
+        
+        <script>
+                 async function deleteEmployee(id){
+                    try{
+                       const response = await fetch(`/del/${id}`,{
+                        method:'DELETE'
+                       });
+                       console.log(id);
+
+                       if(response.ok){
+                        location.reload();
+                       }
+                       else{
+                        console.log('Failed to delete employee');
+                       }
+                    }
+                    catch(error){
+                        console.error(error);
+                    }
+                    
+                    
+                 }
+
+        async function  fetchAndUpdateEmployee(id){
+
+           try{
+            const response1 = await fetch(`/emp/${id}`);
+            const emp = await response1.json();    
+            const user =   prompt(`Username:${emp.user}`);
+            const email =  prompt(`Email:${emp.email}`);
+            const id = emp.id;        
+            const response2 = await fetch(`/put/${id}`,{
+                    method:'PUT',
+                    headers:{ 'Content-Type': 'application/json' },
+                    body:JSON.stringify({id,user,email})
+                    
+            });
+
+                if(response2.ok){
+                    location.reload();
+                  }
+                else{
+                    console.log("CANNOT UPDATE");
+                  }
+           }
+
+           catch(error){
+               console.error(error)
+           }
+           
+        }
+        async function fetchAndAddUser(emp){
+            const user  = prompt("Enter the user name!");
+            const email = prompt("Enter user email!");
+            const id = emp.length+1;
+            console.log(id);
+            try{
+                const response = await fetch('/post',{
+                method:'POST',
+                headers:{ 'Content-Type': 'application/json' },
+                body:JSON.stringify({id,user,email})
+            })
+
+                    if(response.ok){
+                        location.reload();
+                    }
+                    else{
+                        console.log("CANNOT ADD USER");
+                    }
+            }
+            catch(error){
+                       console.error(error); 
+            }
+
+        }
+        function updateEmployee(id){
+            fetchAndUpdateEmployee(id);
+        }
+        function addUser(emp){
+            fetchAndAddUser(emp);
+            console.log("ADDIng user");
+        }        
+        </script>
+    </table>
+    
+
+</body>
+</html>
